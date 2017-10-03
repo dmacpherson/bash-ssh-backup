@@ -1,0 +1,18 @@
+hosts=( HOST1 HOST2 HOST3 HOST4 HOST5 )
+
+dir_backup=/path/to/backups
+tar_backup=`date "+%Y%m%d-%H%M%S"` 
+paths_to_backup="/etc /opt /srv /home /root /usr/local /lib /var/lib /var/local"
+paths_to_exclude="--exclude=/exclude/path/1 --exclude=/exclude/path/2"
+ssh_user=username
+days_to_keep=14
+
+for i in "${hosts[@]}"
+do
+  :
+  if [ ! -d "$dir_backup/$i" ]; then
+    mkdir $dir_backup/$i 
+  fi
+  ssh -n $ssh_user@$i 'tar zcf - '"$paths_to_exclude"' '"$paths_to_backup"' ' | cat -> $dir_backup/$i/$tar_backup.tar.gz
+  find $dir_backup/$i -mindepth 1 -mtime +$days_to_keep -delete
+done
